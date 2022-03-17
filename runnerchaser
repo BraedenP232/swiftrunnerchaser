@@ -1,0 +1,106 @@
+// Mar 16 2022
+// assignment 2 part 2
+import UIKit
+import Foundation
+
+// Game function to be called
+func Game() {
+    
+    let maxTurns = 100 // Max amount of turns
+    var currentTurn = 0 // Current turn variable initialized
+    // I chose to start the runner at 0,0 because it makes more sense to me than 0,9
+    var runner = player.init(xPos: 0, yPos: 0, name: "Runner")  // Initialize the runner and chaser objects at their starting points
+    var chaser = player.init(xPos: 0, yPos: 9, name: "Chaser")
+    
+    // Print to console the starting locations of each player with some fancy concatenation
+    print("Runner is at: " + String(runner.xPos) + "," + String(runner.yPos) + " | Chaser is at: " + String(chaser.xPos) + "," + String(chaser.yPos))
+    // While there has been less than 100 turns, do
+    while (currentTurn <= maxTurns) {
+        
+        // If the game is ending too fast, change the max range of the random move to <3
+        let runnerMove = Int.random(in: 1..<4)  // Random move from 1-3 (I use 'let' because the while loop will run again)
+        let runnerDirection = Int.random(in: 0..<4) // Random direction integer eg. 1 = north, 2 = east, 3 = south, 4 = west
+        let chaserMove = Int.random(in: 1..<4)
+        let chaserDirection = Int.random(in: 0..<4)
+        
+        let runnerResult = doMove(player: runner, runnerDirection, runnerMove) // Store results of doMove function into a tuple
+        runner.xPos = runnerResult.0 ; runner.yPos = runnerResult.1 // Set coordinates via the tuple
+        print("Runner is at: " + String(runner.xPos) + "," + String(runner.yPos)) // Print location after move
+        
+        let chaserResult = doMove(player: chaser, chaserDirection, chaserMove)
+        chaser.xPos = chaserResult.0 ; chaser.yPos = chaserResult.1
+        print("Chaser is at: " + String(chaser.xPos) + "," + String(chaser.yPos))
+        
+        print("   .. End of turn " + String(currentTurn) + " ..  ") // End of turn
+        
+        // If the chaser is on the same point as the runner, end game
+        if (runner.xPos == chaser.xPos) && (runner.yPos == chaser.yPos) {
+            print(" ~~~ Chaser has won! ~~~")
+            print(" ~~~ Chaser has caught the Runner on point: " + String(chaser.xPos) + "," + String(chaser.yPos) + " ~~~ ")
+            break
+        }
+        // If the runner has made it to the top, end game
+        if (runner.yPos == 9) {
+            print(" !~- Runner has won! -~!")
+            print(" !~- Runner has made it to the Chaser's side on point: " + String(runner.xPos) + "," + String(runner.yPos) + " without getting caught! -~!")
+            break
+        }
+        // If max turn limit is reached, end game with stalemate
+        if (currentTurn == maxTurns) {
+            print("""
+\n     ------------
+     Stalement!!!
+     ------------
+""") // Victory screen
+        }
+        currentTurn += 1 // 'While' loop turn counter increment
+    }
+    
+    
+}
+Game() // Call game function, this project wouldn't work without this
+
+// Move player function, takes player, direction (1-4), and the random movement amount. Returns a tuple of coordinates
+func doMove(player: player, _ direction:Int, _ playerMove:Int) -> (Int, Int) {
+    switch direction { // This is where the random direction comes in. 1 = north, 2 = east, 3 = south, 4 = west
+    case 0:
+        if ((player.yPos + playerMove) <= 9) { // If the player's move + position is NOT more than y=9, return new location
+            print(player.name + " is moving north " + String(playerMove) + " squares.")
+            return (player.xPos, (player.yPos + playerMove))
+        } else { // Else return current x position and max y position
+            print(player.name + " is moving north " + String(9 % player.yPos) + " squares.")
+            return (player.xPos, 9)
+        }
+    case 1:
+        if ((player.xPos + playerMove) <= 9) { // If the player's move + position is NOT more than x=9, return new location
+            print(player.name + " is moving east " + String(playerMove) + " squares.")
+            return ((player.xPos + playerMove), player.yPos)
+        } else { // Else return current y position and max x position
+            print(player.name + " is moving east " + String(9 % player.xPos) + " squares.")
+            return (0, player.yPos)
+        }
+    case 2:
+        if ((player.yPos - playerMove) >= 0) { // If location will NOT be less than 0, return new location
+            print(player.name + " is moving south " + String(playerMove) + " squares.")
+            return (player.xPos, (player.yPos - playerMove))
+        } else { // Else return min y position and current x
+            print(player.name + " is moving south " + String(playerMove) + " squares.")
+            return (player.xPos, 0)
+        }
+    default:
+        if ((player.xPos - playerMove) >= 0) {
+            print(player.name + " is moving west " + String(playerMove) + " squares.")
+            return ((player.xPos - playerMove), player.yPos)
+        } else {
+            print(player.name + " is moving west " + String(playerMove) + " squares.")
+            return (0, player.yPos)
+        }
+    }
+}
+
+// Player structure, nothing too complicated
+struct player {
+    var xPos: Int
+    var yPos: Int
+    var name: String
+}
